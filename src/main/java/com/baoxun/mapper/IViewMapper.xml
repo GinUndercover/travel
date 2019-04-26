@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baoxun.mapper.IViewMapper">
+    <!--获得二级类目-->
+    <select id="getSecondLocal" parameterType="int" resultType="SecondLocal">
+        SELECT *
+        FROM Secondlocal
+        WHERE fid=#{fid}
+    </select>
+    <!--添加景点信息-->
+    <insert id="addView" parameterType="com.baoxun.po.ViewMessage" >
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into viewmessage(viewname,viewdescription,viewprice,memberprice,hot,number,viewplace,date) values(#{viewname},#{viewdescription},#{viewprice},#{memberprice},#{hot},#{number},#{viewplace},#{date})
+    </insert>
+    <!--修改景点信息-->
+    <update id="updateView" parameterType="com.baoxun.po.ViewMessage">
+        UPDATE viewmessage SET viewname=#{viewname},viewdescription=#{viewdescription},viewprice=#{viewprice},memberprice=#{memberprice},hot=#{hot},number=#{number},viewplace=#{viewplace},date=#{date}
+        WHERE  id = #{id}
+    </update>
+    <!--添加小图-->
+    <insert id="addImg" parameterType="image" >
+        insert into image(imgname,old_name,path,imgdate,proid) values(#{imgname},#{old_name},#{path},#{imgdate},#{proid})
+    </insert>
+    <!--增加商品缩略图-->
+    <insert id="addSmallimg" parameterType="image" >
+        insert into smallimage(path,proid) values(#{path},#{proid})
+    </insert>
+    <!--获得查询的景点数量-->
+    <select id="getViewTotal" parameterType="com.baoxun.po.ViewMessageEXT" resultType="int">
+        SELECT COUNT(*)
+        FROM viewmessage INNER JOIN secondlocal INNER JOIN firstlocal on viewmessage.viewplace = secondlocal.sid and secondlocal.fid = firstlocal.fid
+        <where>
+            <if test="viewname !=null and viewname != ''">
+                and viewname LIKE #{viewname}
+            </if>
+            <if test="viewplace !=null and viewplace != ''">
+                and viewplace = #{viewplace}
+            </if>
+            <if test="fid !=null and fid != ''">
+                and firstlocal.fid = #{fid}
+            </if>
+        </where>
+    </select>
+    <!--获得景点信息列表-->
+    <select id="getViewList" parameterType="com.baoxun.po.ViewMessageEXT" resultType="com.baoxun.po.ViewMessageEXT">
+        SELECT id,viewname,viewdescription,viewprice,memberprice,hot,number,viewplace,date,slocal,firstlocal.fid
+        FROM viewmessage INNER JOIN secondlocal INNER JOIN firstlocal on viewmessage.viewplace = secondlocal.sid and secondlocal.fid = firstlocal.fid
+        <where>
+            1=1
+            <if test="viewname !=null and viewname != ''">
+                and viewname LIKE #{viewname}
+            </if>
+            <if test="viewplace !=null and viewplace != ''">
+                and viewplace = #{viewplace}
+            </if>
+            <if test="fid !=null and fid != ''">
+                and firstlocal.fid = #{fid}
+            </if>
+            <choose>
+                <when test="checkbynumber!=null and checkbynumber != ''">
+                    ORDER BY number ASC
+                </when>
+                <when test="checkbypricehigh!=null and checkbypricehigh != ''">
+                    ORDER BY viewprice DESC
+                </when>
+                <when test="checkbypricelow!=null and checkbypricelow != ''">
+                    ORDER BY viewprice ASC
+                </when>
+                <otherwise>
+                    ORDER BY id DESC
+                </otherwise>
+            </choose>
+            limit #{pagenow},#{pagesize}
+        </where>
+    </select>
+    <select id="getSecondByfid" resultType="com.baoxun.po.SecondLocal" parameterType="int">
+        SELECT *
+        FROM secondlocal
+        WHERE fid=#{fid}
+    </select>
+    <select id="getImage" resultType="com.baoxun.po.Image" parameterType="int">
+        SELECT *
+        FROM image
+        WHERE proid=#{id}
+    </select>
+    <!--/*根据ID查找商品特写图地址 用户回显*/-->
+    <select id="smallImg" resultType="com.baoxun.po.Image" parameterType="int">
+        SELECT *
+        FROM smallimage
+        WHERE proid=#{id}
+    </select>
+    <!--/*根据ID删除图片头像*/-->
+    <delete id="delimg" parameterType="int">
+        DELETE FROM image WHERE proid = #{id}
+    </delete>
+    <!--/*根据ID查找商品头像地址 用于删除获得地址*/-->
+    <select id="imagepath" resultType="image" parameterType="int">
+        select *
+        FROM image
+        WHERE proid = #{pid}
+    </select>
+    <!-- /*根据ID查找商品特写图地址 用于删除获得地址*/-->
+    <select id="smallimagepath" resultType="image" parameterType="int">
+        select *
+        FROM smallimage
+        WHERE image_id = #{pid}
+    </select>
+    <!--/*根据ID删除特写图片*/-->
+    <delete id="delsmallimg" parameterType="int">
+        DELETE FROM smallimage WHERE image_id = #{id}
+    </delete>
+    <!--/*根据viewID删除特写图片*/-->
+    <delete id="delsmallimgbypid" parameterType="int">
+        DELETE FROM smallimage WHERE proid = #{id}
+    </delete>
+    <!--删除产品信息-->
+    <delete id="delView" parameterType="int">
+        DELETE FROM viewmessage WHERE id = #{id}
+    </delete>
+    <!-- /*获取点击量前四的景点信息*/-->
+    <select id="gethotview" resultType="viewMessageEXT">
+        SELECT *
+        FROM viewmessage INNER JOIN image on viewmessage.id = image.proid
+        ORDER BY hot DESC
+        LIMIT 0,4
+    </select>
+    <!-- /*获取最新添加前四的景点信息*/-->
+    <select id="getnewview" resultType="viewMessageEXT">
+        SELECT *
+        FROM viewmessage INNER JOIN image on viewmessage.id = image.proid
+        ORDER BY id DESC
+        LIMIT 0,4
+    </select>
+    <!--价格前六-->
+    <select id="getpriceview" resultType="viewMessageEXT">
+        SELECT *
+        FROM viewmessage INNER JOIN image on viewmessage.id = image.proid
+        ORDER BY viewprice DESC
+        LIMIT 0,6
+    </select>
+    <select id="getviewbyid" resultType="viewMessageEXT" parameterType="int">
+        SELECT *
+        FROM viewmessage
+        WHERE id=#{id}
+    </select>
+    <!--热度加1-->
+    <update id="addhot" parameterType="int">
+        UPDATE viewmessage SET hot=hot+1
+        WHERE  id = #{id}
+    </update>
+    <!--搜索景点信息列表-->
+    <select id="getsearchView" parameterType="com.baoxun.po.ViewMessageEXT" resultType="com.baoxun.po.ViewMessageEXT">
+        SELECT *
+        FROM viewmessage INNER JOIN image on id=proid
+        <where>
+            1=1
+            <if test="viewname !=null and viewname != ''">
+                and viewname LIKE #{viewname}
+            </if>
+            <if test="viewplace !=null and viewplace != ''">
+                and viewplace = #{viewplace}
+            </if>
+            <if test="fid !=null and fid != ''">
+                and firstlocal.fid = #{fid}
+            </if>
+            <choose>
+                <when test="checkbynumber!=null and checkbynumber != ''">
+                    ORDER BY number ASC
+                </when>
+                <when test="checkbypricehigh!=null and checkbypricehigh != ''">
+                    ORDER BY viewprice DESC
+                </when>
+                <when test="checkbypricelow!=null and checkbypricelow != ''">
+                    ORDER BY viewprice ASC
+                </when>
+                <otherwise>
+                    ORDER BY id DESC
+                </otherwise>
+            </choose>
+            limit #{pagenow},#{pagesize}
+        </where>
+    </select>
+</mapper>

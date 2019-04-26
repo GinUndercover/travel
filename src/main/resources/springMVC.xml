@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           ">
+    <!-- Controller对象不需要创建，Spring以注解的方式创建，但要扫描注解 -->
+    <context:component-scan base-package="com.baoxun.controller" />
+    <!-- 默认驱动 配置了这个就相当于配置了映射器和配置器 -->	     <!-- 配置处理器映射器:springmvc默认的处理器映射器 根据bean（自定义Controller的bean）的Name属性的Url去寻找执行类 -->
+    <mvc:annotation-driven />											 <!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"></bean> -->
+    <!-- 配置处理器适配器 -->
+    <!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"></bean> -->
+    <!-- 配置视图解析器(将物理试图转化为逻辑视图) 必须指明ID 否则不生效 -->
+    <bean id="viewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 逻辑地址 前缀 -->
+        <property name="Prefix" value="/WEB-INF/view/" />
+        <!-- 后缀 -->
+        <property name="Suffix" value=".jsp" />
+    </bean>
+</beans>

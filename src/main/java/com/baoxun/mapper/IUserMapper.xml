@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baoxun.mapper.IUserMapper">
+    <!--注册-->
+    <insert id="userSign" parameterType="com.baoxun.po.User">
+        insert into user(username,password,email,name,telephone,sex,birthday)
+        values(#{username},#{password},#{email},#{name},#{telephone},#{sex},#{birthday});
+    </insert>
+<!--登陆验证-->
+    <select id="userLogin" parameterType="user" resultType="user">
+        SELECT *
+        FROM user
+        WHERE username= #{username} and password= #{password}
+    </select>
+
+    <!--登录人信息更改-->
+    <update id="updataUser" parameterType="user">
+        UPDATE user SET password= #{password},sex= #{sex},telephone=#{telephone},email=#{email},power=#{power} WHERE id=#{id}
+    </update>
+    <!--获得用户信息列表-->
+    <select id="getUserlist" parameterType="com.baoxun.po.User" resultType="com.baoxun.po.User">
+        SELECT *
+        FROM `user`
+        <where>
+            1=1
+            <if test="username !=null and username != ''">
+                and username LIKE #{username}
+            </if>
+            ORDER BY id DESC
+            limit #{pagenow},#{pagesize}
+        </where>
+    </select>
+    <!--获得查询的用户数量-->
+    <select id="getUserTotal" parameterType="com.baoxun.po.User" resultType="int">
+        SELECT COUNT(*)
+        FROM `user`
+        <where>
+            1=1
+            <if test="username !=null and username != ''">
+                and username LIKE #{username}
+            </if>
+        </where>
+    </select>
+    <!--添加用户-->
+    <insert id="addUser" parameterType="com.baoxun.po.User">
+        insert into user(username,password,email,name,telephone,sex,birthday,power)
+        values(#{username},#{password},#{email},#{name},#{telephone},#{sex},#{birthday},#{power});
+    </insert>
+    <!--用户名重复检验-->
+    <select id="checkUsername" resultType="int" parameterType="String">
+        select COUNT(*)
+        from `user`
+        WHERE username= #{username}
+    </select>
+    <!--修改用户信息-->
+    <update id="updateuserall" parameterType="user">
+        UPDATE user SET password= #{password},sex= #{sex},telephone=#{telephone},email=#{email},power=#{power},birthday=#{birthday},name=#{name} WHERE id=#{id}
+    </update>
+    <!--/*删除用户信息*/-->
+    <delete id="deluser" parameterType="int">
+        DELETE FROM `user` WHERE id=#{id}
+    </delete>
+    <!--批量删除-->
+    <delete id="delmoreuser">
+        DELETE FROM `USER` WHERE id in
+        <foreach collection="array" item="del" open="(" separator="," close=")">
+            <!-- collection表示类型，数组是array,集合是List,item 是一个变量名,open表示左括号,separator是逗号,close是右括号 -->
+            #{del}
+        </foreach>
+    </delete>
+</mapper>

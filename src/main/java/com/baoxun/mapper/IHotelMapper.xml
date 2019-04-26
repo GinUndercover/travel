@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baoxun.mapper.IHotelMapper">
+    <!--获得酒店信息列表-->
+    <select id="getHotellist" parameterType="com.baoxun.po.Hotel" resultType="com.baoxun.po.Hotel">
+        SELECT *
+        FROM hotel INNER JOIN secondlocal on hotel.hotellocal=secondlocal.sid
+        <where>
+            1=1
+            <if test="hotelname !=null and hotelname != ''">
+                and hotelname LIKE #{hotelname}
+            </if>
+            ORDER BY hid DESC
+            limit #{pagenow},#{pagesize}
+        </where>
+    </select>
+    <!--获得查询的用户数量-->
+    <select id="getHotelTotal" parameterType="com.baoxun.po.Hotel" resultType="int">
+        SELECT COUNT(*)
+        FROM hotel
+        <where>
+            1=1
+            <if test="hotelname !=null and hotelname != ''">
+                and hotelname LIKE #{hotelname}
+            </if>
+        </where>
+    </select>
+<!--    /*根据ID获得酒店信息*/-->
+    <select id="hetHotelByid" parameterType="int" resultType="com.baoxun.po.Hotel">
+        SELECT *
+        FROM hotel INNER JOIN secondlocal on hotel.hotellocal=secondlocal.sid
+        WHERE hid=#{hid}
+    </select>
+    <!--获得二级景点列表-->
+    <select id="getSecondLocallist" resultType="com.baoxun.po.SecondLocal">
+        SELECT *
+        FROM secondlocal
+    </select>
+    <!--修改酒店信息-->
+    <update id="updatehotel" parameterType="com.baoxun.po.Hotel">
+        UPDATE hotel SET hotelname= #{hotelname},hotellocal= #{hotellocal},smallroomprice=#{smallroomprice},midroomprice=#{midroomprice},bigroomprice=#{bigroomprice},smallroomnum=#{smallroomnum},midroomnum=#{midroomnum},bigroomnum=#{bigroomnum} WHERE hid=#{hid}
+    </update>
+    <!--添加酒店信息-->
+    <insert id="addhotel" parameterType="com.baoxun.po.Hotel">
+        INSERT INTO hotel(hotelname,hotellocal,smallroomprice,midroomprice,bigroomprice,smallroomnum,midroomnum,bigroomnum) VALUE (#{hotelname},#{hotellocal},#{smallroomprice},#{midroomprice},#{bigroomprice},#{smallroomnum},#{midroomnum},#{bigroomnum})
+    </insert>
+    <!--删除酒店信息-->
+    <delete id="delhotel" parameterType="int">
+        DELETE FROM hotel where hid=#{hid}
+    </delete>
+</mapper>

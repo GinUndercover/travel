@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       					   http://www.springframework.org/schema/beans/spring-beans.xsd
+       					   http://www.springframework.org/schema/context
+       					   http://www.springframework.org/schema/context/spring-context.xsd
+       					   http://www.springframework.org/schema/aop
+       					   http://www.springframework.org/schema/aop/spring-aop.xsd
+       					   http://www.springframework.org/schema/tx
+       					   http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 装配数据源  这个是dbcp的-->
+    <!-- <bean id="dataSourceID" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value= "com.mysql.jdbc.Driver"></property>
+        <property name="url" value= "jdbc:mysql://localhost:3306/mydb"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="root"></property>
+    </bean> -->
+    <!-- 注解开发 -->
+    <!-- 扫描注解 -->
+    <context:component-scan base-package="com.baoxun"></context:component-scan>
+    <!-- 加载外部配置文件 解决数据库链接的耦合性 -->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!-- 装配数据源  这个是c3p0的 -->
+    <bean id="dataSourceID" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"></property>
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="maxPoolSize" value="${c3p0.maxPoolSize}"></property>
+        <property name="minPoolSize" value="${c3p0.minPoolSize}"></property>
+        <property name="autoCommitOnClose" value="${c3p0.autoCommitOnClose}"></property>
+        <property name="checkoutTimeout" value="${c3p0.checkoutTimeout}"></property>
+        <property name="acquireRetryAttempts" value="${c3p0.acquireRetryAttempts}"></property>
+    </bean>
+    <!-- 装配Mybatis 1自动装配DAO 接口+映射文件 自动生成实现类 -->
+    <bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceID"></property>
+        <property name="configLocation" value="classpath:SqlMapConfig.xml"></property>
+    </bean>
+    <!-- 2整包扫描 -->															<!-- 装配DAO 这个需要一个一个指明 麻烦 用整包扫描指明 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">	<!-- <bean id="userDao" class="org.mybatis.spring.mapper.MapperFactoryBean"> -->
+        <!-- 指明扫描包 -->
+        <property name="basePackage" value="com.baoxun.mapper"></property>
+        <!-- 指明SqlSessionFactory -->
+        <property name="sqlSessionFactoryBeanName" value="SqlSessionFactory"></property>
+    </bean>																	<!-- 注入接口 -->
+    <!-- <property name="mapperInterface" value="com.baoxun.dao.UserDao"></property> -->
+    <!-- 注入工厂 -->
+    <!-- <property name="sqlSessionFactory" ref="SqlSessionFactory"></property> -->
+    <!-- </bean> -->
+    <!-- 多部分文件上传 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8"></property>
+        <property name="maxUploadSize" value="10485760000"></property>
+        <property name="maxInMemorySize" value="40960"></property>
+    </bean>
+
+    <!-- 切面类 -->
+   <!-- <bean id="advice" class="com.baoxun.aop.Advice"></bean>-->
+    <!-- 装配事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 注入数据源  -->
+        <property name="dataSource" ref="dataSourceID"></property>
+    </bean>
+    <!--事务详情 后面需要指明哪个事务管理器  -->
+   <!-- <tx:advice id="tx" transaction-manager="txManager">
+        &lt;!&ndash; 定义事务 &ndash;&gt;
+        <tx:attributes>
+            &lt;!&ndash;方法名  &ndash;&gt;		&lt;!&ndash; 隔离级别 &ndash;&gt;        &lt;!&ndash;传播行为  &ndash;&gt;
+            <tx:method name="*" isolation="DEFAULT" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <aop:advisor advice-ref="tx" pointcut="execution(* com.baoxun.service.*.*(..))"/>
+    </aop:config>-->
+</beans>
